@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Merlin Legal Intake — Reviewer</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet"/>
+<style>
+:root{--navy:#0B1F3A;--orange:#F47920;--green:#2D7A4F;--red:#993C1D;--border:#DDE3EC;--bg:#F5F7FA;--white:#fff;--text:#1A2B45;--muted:#6B7A99;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+.header{background:var(--navy);padding:0 2rem;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.header-left{display:flex;align-items:center;gap:12px;}
+.header-title{color:#fff;font-family:'Playfair Display',serif;font-size:18px;}
+.header-badge{background:var(--orange);color:#fff;font-size:10px;font-weight:800;padding:3px 10px;border-radius:20px;letter-spacing:.06em;text-transform:uppercase;}
+.main{max-width:1100px;margin:2rem auto;padding:0 1.5rem;}
+/* Login */
+.login-card{background:var(--white);border-radius:16px;padding:40px;max-width:420px;margin:4rem auto;box-shadow:0 4px 24px rgba(0,0,0,.08);}
+.login-title{font-family:'Playfair Display',serif;font-size:24px;color:var(--navy);margin-bottom:8px;}
+.login-sub{font-size:14px;color:var(--muted);margin-bottom:24px;}
+.input{width:100%;padding:12px 14px;border:2px solid var(--border);border-radius:10px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;color:var(--text);margin-bottom:12px;transition:border-color .2s;}
+.input:focus{outline:none;border-color:var(--orange);}
+.btn{width:100%;padding:13px;border:none;border-radius:10px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;cursor:pointer;transition:all .18s;}
+.btn-primary{background:var(--navy);color:#fff;}
+.btn-primary:hover{background:#1E3A5F;}
+.btn-approve{background:var(--green);color:#fff;}
+.btn-approve:hover{background:#1F6B3E;}
+.btn-secondary{background:none;border:1.5px solid var(--border);color:var(--muted);margin-top:8px;}
+.btn-secondary:hover{border-color:var(--navy);color:var(--navy);}
+.error{color:var(--red);font-size:12px;font-weight:700;margin-bottom:10px;display:none;}
+/* Queue */
+.queue-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;}
+.queue-title{font-family:'Playfair Display',serif;font-size:24px;color:var(--navy);}
+.reviewer-tag{background:var(--orange);color:#fff;font-size:11px;font-weight:800;padding:4px 12px;border-radius:20px;}
+.card{background:var(--white);border-radius:12px;padding:20px 24px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:box-shadow .18s;}
+.card:hover{box-shadow:0 4px 16px rgba(0,0,0,.12);}
+.card-left{flex:1;}
+.card-id{font-size:15px;font-weight:800;color:var(--navy);}
+.card-meta{font-size:12px;color:var(--muted);margin-top:3px;}
+.badge{font-size:11px;font-weight:800;padding:4px 12px;border-radius:20px;}
+.badge-pending{background:#FFF0E4;color:#C45C10;}
+.badge-approved{background:#EAF3DE;color:#27500A;}
+.empty{text-align:center;padding:48px;color:var(--muted);font-size:14px;}
+/* Review panel */
+.review-header{background:var(--navy);padding:18px 24px;border-radius:12px 12px 0 0;display:flex;align-items:center;justify-content:space-between;}
+.review-id{background:var(--orange);color:#fff;font-size:11px;font-weight:800;padding:4px 12px;border-radius:20px;}
+.review-body{background:var(--white);border-radius:0 0 12px 12px;padding:0 24px 24px;}
+.section-head{font-size:11px;font-weight:800;color:var(--orange);text-transform:uppercase;letter-spacing:.08em;margin:20px 0 8px;padding-bottom:4px;border-bottom:2px solid #FEF0E4;}
+.review-row{display:flex;gap:12px;align-items:flex-start;padding:8px 0;border-bottom:1px solid #F0F4F9;}
+.review-row:last-child{border-bottom:none;}
+.review-lbl{font-weight:700;color:var(--muted);width:200px;flex-shrink:0;font-size:11px;text-transform:uppercase;letter-spacing:.04em;padding-top:8px;}
+.review-val{flex:1;}
+.review-val input,.review-val textarea{width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:600;color:var(--text);resize:none;transition:border-color .2s;}
+.review-val input:focus,.review-val textarea:focus{outline:none;border-color:var(--orange);}
+.edited{border-color:var(--orange)!important;background:#FEF6EE!important;}
+.notes-area{padding:12px 0;}
+.notes-area textarea{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:600;color:var(--text);resize:vertical;min-height:80px;}
+.action-row{display:flex;gap:10px;margin-top:20px;}
+.action-row .btn{flex:1;}
+.status-box{padding:14px 18px;border-radius:10px;font-weight:700;font-size:13px;margin-top:12px;display:none;text-align:center;}
+.status-ok{background:#EAF3DE;color:#27500A;border:1px solid #b8dfc9;}
+.status-err{background:#FAECE7;color:var(--red);border:1px solid #F0997B;}
+.loading{text-align:center;padding:48px;color:var(--muted);}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <span class="header-title">Merlin Legal Intake — Reviewer Portal</span>
+    <span class="header-badge">Attorney-Client Privileged</span>
+  </div>
+  <div id="reviewer-tag"></div>
+</div>
+
+<div class="main" id="main-area">
+  <!-- Login shown first -->
+  <div class="login-card" id="login-section">
+    <div class="login-title">Reviewer Login</div>
+    <div class="login-sub">Sign in to access the review queue.</div>
+    <input class="input" id="login-name" placeholder="Your name (hannah or rachel)" autocomplete="off"/>
+    <input class="input" id="login-pass" type="password" placeholder="Password" autocomplete="off"/>
+    <div class="error" id="login-err">Incorrect name or password. Please try again.</div>
+    <button class="btn btn-primary" onclick="doLogin()">Login</button>
+  </div>
+
+  <!-- Queue shown after login -->
+  <div id="queue-section" style="display:none">
+    <div class="queue-header">
+      <div class="queue-title">Review Queue</div>
+      <button class="btn btn-secondary" style="width:auto;padding:8px 16px;" onclick="logout()">Log out</button>
+    </div>
+    <div id="queue-list"><div class="loading">Loading submissions...</div></div>
+  </div>
+
+  <!-- Review panel -->
+  <div id="review-section" style="display:none"></div>
+</div>
+
+<script>
+var REVIEWER_PASSWORDS = { 'hannah': 'Merlin123!', 'rachel': 'Merlin123!' };
+var ASANA_PROJECT_ID = '1200751913554549';
+var SP_SITE_URL = 'https://merlin3.sharepoint.com/sites/Merlin-LegalIntakeForm';
+var SP_LIST_API = SP_SITE_URL + "/_api/web/lists(guid'505fa988-504a-4947-b8d8-324d7977d78f')/items";
+
+var currentReviewer = null;
+var reviewEdits = {};
+var currentItem = null;
+
+// ── LOGIN ──────────────────────────────────────────────────────────────
+document.getElementById('login-pass').onkeydown = function(e){ if(e.key==='Enter') doLogin(); };
+
+function doLogin(){
+  var name = (document.getElementById('login-name').value||'').trim().toLowerCase();
+  var pass = document.getElementById('login-pass').value||'';
+  var err = document.getElementById('login-err');
+  if(REVIEWER_PASSWORDS[name] && REVIEWER_PASSWORDS[name]===pass){
+    currentReviewer = name;
+    err.style.display='none';
+    document.getElementById('login-section').style.display='none';
+    document.getElementById('queue-section').style.display='block';
+    document.getElementById('reviewer-tag').innerHTML='<span class="reviewer-tag">'+name+'</span>';
+    loadQueue();
+  } else {
+    err.style.display='block';
+  }
+}
+
+function logout(){
+  currentReviewer=null;
+  document.getElementById('queue-section').style.display='none';
+  document.getElementById('review-section').style.display='none';
+  document.getElementById('login-section').style.display='block';
+  document.getElementById('reviewer-tag').innerHTML='';
+}
+
+// ── LOAD QUEUE FROM SHAREPOINT ─────────────────────────────────────────
+function loadQueue(){
+  var qlist = document.getElementById('queue-list');
+  qlist.innerHTML='<div class="loading">Loading submissions...</div>';
+
+  fetch(SP_LIST_API + '?$orderby=Created desc&$top=50', {
+    headers:{ 'Accept':'application/json;odata=verbose' }
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    var items = data.d ? data.d.results : [];
+    if(!items.length){ qlist.innerHTML='<div class="empty">No submissions yet.</div>'; return; }
+
+    var html='';
+    items.forEach(function(item){
+      var date = item.SubmittedAt ? new Date(item.SubmittedAt).toLocaleDateString() : 'Unknown date';
+      var badgeClass = item.Status==='Approved' ? 'badge-approved' : 'badge-pending';
+      html += '<div class="card" onclick="openReview('+item.ID+')">'
+        +'<div class="card-left">'
+        +'<div class="card-id">'+(item.SubmissionID||item.Title||'Submission')+'</div>'
+        +'<div class="card-meta">'+(item.FormType||'')+'&nbsp;&nbsp;·&nbsp;&nbsp;'+date+'&nbsp;&nbsp;·&nbsp;&nbsp;'+(item.MerlinEntity||'')+'</div>'
+        +'</div>'
+        +'<span class="badge '+badgeClass+'">'+(item.Status||'Pending')+'</span>'
+        +'</div>';
+    });
+    qlist.innerHTML=html;
+  })
+  .catch(function(e){
+    qlist.innerHTML='<div class="empty">Error loading submissions. Make sure you are signed into SharePoint.<br><br>'+e.message+'</div>';
+  });
+}
+
+// ── OPEN A SUBMISSION FOR REVIEW ───────────────────────────────────────
+function openReview(itemId){
+  var panel = document.getElementById('review-section');
+  panel.style.display='block';
+  document.getElementById('queue-section').style.display='none';
+  panel.innerHTML='<div class="loading">Loading submission...</div>';
+  reviewEdits={};
+
+  fetch(SP_LIST_API+'/'+itemId, { headers:{'Accept':'application/json;odata=verbose'} })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    currentItem = data.d;
+    renderReviewPanel(currentItem);
+  })
+  .catch(function(e){
+    panel.innerHTML='<div class="empty">Error loading submission: '+e.message+'</div>';
+  });
+}
+
+function renderReviewPanel(item){
+  var genAnswers = [];
+  var frmAnswers = [];
+  try{ genAnswers = JSON.parse(item.GeneralAnswers||'[]'); }catch(e){}
+  try{ frmAnswers = JSON.parse(item.FormAnswers||'[]'); }catch(e){}
+
+  var date = item.SubmittedAt ? new Date(item.SubmittedAt).toLocaleString() : '';
+
+  var html = '<div class="review-header">'
+    +'<div><span style="font-family:Playfair Display,serif;font-size:18px;color:#fff;">Intake Review</span>'
+    +'<div style="font-size:12px;color:rgba(255,255,255,.6);margin-top:4px;">'+item.FormType+' &nbsp;·&nbsp; Submitted: '+date+'</div></div>'
+    +'<span class="review-id">'+(item.SubmissionID||item.Title)+'</span>'
+    +'</div>'
+    +'<div class="review-body">';
+
+  html += '<div class="section-head">General Information</div>';
+  genAnswers.filter(function(a){return a.answer&&a.answer!=='N/A';}).forEach(function(a,i){
+    html += makeRow('g_'+i, a.question, a.answer);
+  });
+
+  html += '<div class="section-head">'+item.FormType+' — Specific Details</div>';
+  frmAnswers.filter(function(a){return a.answer&&a.answer!=='N/A (skipped)'&&a.answer!=='N/A';}).forEach(function(a,i){
+    html += makeRow('f_'+i, a.question, a.answer);
+  });
+
+  html += '<div class="section-head">Reviewer Notes</div>'
+    +'<div class="notes-area"><textarea id="reviewer-notes" placeholder="Add any notes for the legal team before approving..." rows="3"></textarea></div>';
+
+  html += '<div id="status-box" class="status-box"></div>';
+
+  html += '<div class="action-row">'
+    +'<button class="btn btn-approve" onclick="approveSubmission()">✓ Approve & Notify Legal</button>'
+    +'<button class="btn btn-secondary" onclick="backToQueue()">← Back to Queue</button>'
+    +'</div></div>';
+
+  document.getElementById('review-section').innerHTML = html;
+}
+
+function makeRow(key, label, value){
+  var isLong = value && value.length > 60;
+  var tag = isLong ? 'textarea' : 'input';
+  var extra = isLong ? ' rows="2"' : '';
+  return '<div class="review-row">'
+    +'<div class="review-lbl">'+label.replace(/[*_]/g,'').substring(0,60)+'</div>'
+    +'<div class="review-val"><'+tag+extra+' id="field_'+key+'" oninput="onEdit(this,\''+key+'\')">'+(isLong?value:'')+'</'+tag+'>'
+    +(isLong?'':'')+'</div></div>';
+  // For inputs set value after
+}
+
+function onEdit(el, key){
+  reviewEdits[key] = el.value;
+  el.classList.add('edited');
+}
+
+function backToQueue(){
+  document.getElementById('review-section').style.display='none';
+  document.getElementById('queue-section').style.display='block';
+  loadQueue();
+}
+
+// ── APPROVE ────────────────────────────────────────────────────────────
+function approveSubmission(){
+  if(!currentItem) return;
+  var notes = (document.getElementById('reviewer-notes')||{}).value||'';
+  var statusBox = document.getElementById('status-box');
+  statusBox.style.display='block';
+  statusBox.className='status-box status-ok';
+  statusBox.textContent='Processing...';
+
+  // Build updated answers
+  var genAnswers=[]; var frmAnswers=[];
+  try{ genAnswers=JSON.parse(currentItem.GeneralAnswers||'[]'); }catch(e){}
+  try{ frmAnswers=JSON.parse(currentItem.FormAnswers||'[]'); }catch(e){}
+
+  var filteredGen = genAnswers.filter(function(a){return a.answer&&a.answer!=='N/A';});
+  var filteredFrm = frmAnswers.filter(function(a){return a.answer&&a.answer!=='N/A (skipped)'&&a.answer!=='N/A';});
+
+  Object.keys(reviewEdits).forEach(function(k){
+    if(k.startsWith('g_')){ var i=parseInt(k.slice(2)); if(filteredGen[i]) filteredGen[i].answer=reviewEdits[k]; }
+    else if(k.startsWith('f_')){ var i=parseInt(k.slice(2)); if(filteredFrm[i]) filteredFrm[i].answer=reviewEdits[k]; }
+  });
+
+  // Update SharePoint item status
+  updateSharePointStatus(currentItem.ID, notes, function(ok){
+    if(ok){
+      // Send Asana task email
+      sendAsanaEmail(filteredGen, filteredFrm, notes);
+      // Send legal notification email
+      sendLegalEmail(filteredGen, filteredFrm, notes);
+      statusBox.textContent='✓ Approved! Asana task email and legal notification have opened in Outlook.';
+    } else {
+      statusBox.className='status-box status-err';
+      statusBox.textContent='Approved locally but could not update SharePoint status. Please check your connection.';
+      sendAsanaEmail(filteredGen, filteredFrm, notes);
+      sendLegalEmail(filteredGen, filteredFrm, notes);
+    }
+  });
+}
+
+function updateSharePointStatus(itemId, notes, callback){
+  fetch(SP_SITE_URL+'/_api/contextinfo',{method:'POST',headers:{'Accept':'application/json;odata=verbose'}})
+  .then(function(r){return r.json();})
+  .then(function(ctx){
+    var digest = ctx.d.GetContextWebInformation.FormDigestValue;
+    return fetch(SP_LIST_API+'/'+itemId,{
+      method:'POST',
+      headers:{
+        'Accept':'application/json;odata=verbose',
+        'Content-Type':'application/json;odata=verbose',
+        'X-RequestDigest':digest,
+        'X-HTTP-Method':'MERGE',
+        'IF-MATCH':'*'
+      },
+      body:JSON.stringify({
+        '__metadata':{'type':'SP.Data.Legal_x0020_Intake_x0020_SubmissionsListItem'},
+        'Status':'Approved',
+        'Title':(currentItem.SubmissionID||currentItem.Title)+' — Approved by '+currentReviewer
+      })
+    });
+  })
+  .then(function(){ callback(true); })
+  .catch(function(e){ console.log('SP update error:',e); callback(false); });
+}
+
+function buildTaskNotes(genAnswers, frmAnswers, notes){
+  var priority = genAnswers[2] ? genAnswers[2].answer : '';
+  var effectiveDate = genAnswers[4] ? genAnswers[4].answer : '';
+  var lines=[];
+  lines.push('************************************************************************************');
+  lines.push('**** ACTION REQUIRED: ATTACH THE APPROVED WORD DOCUMENT (.docx) TO THIS TASK.  ****');
+  lines.push('************************************************************************************');
+  lines.push('');
+  lines.push('=== SET THESE FIELDS IN ASANA ===');
+  if(priority) lines.push('PRIORITY:  '+priority+'  <-- set in Asana Priority field');
+  if(effectiveDate&&effectiveDate!=='N/A') lines.push('DUE DATE:  '+effectiveDate+'  <-- set in Asana Due Date field');
+  lines.push('=================================');
+  lines.push('');
+  lines.push('LEGAL INTAKE — APPROVED');
+  lines.push('Submission ID: '+(currentItem.SubmissionID||currentItem.Title));
+  lines.push('Agreement Type: '+currentItem.FormType);
+  lines.push('Entity: '+(currentItem.MerlinEntity||''));
+  lines.push('Approved by: '+currentReviewer+' on '+new Date().toLocaleString());
+  if(notes) lines.push('Reviewer notes: '+notes);
+  lines.push('');
+  lines.push('--- GENERAL INFORMATION ---');
+  genAnswers.forEach(function(a){lines.push(a.question.replace(/[*_]/g,'')+': '+a.answer);});
+  lines.push('');
+  lines.push('--- '+currentItem.FormType.toUpperCase()+' ---');
+  frmAnswers.forEach(function(a){lines.push(a.question.replace(/[*_]/g,'')+': '+a.answer);});
+  return lines.join('\r\n');
+}
+
+function sendAsanaEmail(gen, frm, notes){
+  var subject='[Legal Intake — APPROVED] '+(currentItem.FormType||'')+' — '+(currentItem.SubmissionID||currentItem.Title);
+  var body = buildTaskNotes(gen, frm, notes);
+  var asanaEmail='x+'+ASANA_PROJECT_ID+'@mail.asana.com';
+  var a=document.createElement('a');
+  a.href='mailto:'+asanaEmail+'?cc='+encodeURIComponent('legal@themerlingroup.com')+'&subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
+  a.style.display='none'; document.body.appendChild(a); a.click();
+  setTimeout(function(){document.body.removeChild(a);},1000);
+}
+
+function sendLegalEmail(gen, frm, notes){
+  var subject='[Legal Intake — APPROVED] '+(currentItem.FormType||'')+' — '+(currentItem.SubmissionID||currentItem.Title);
+  var lines=[];
+  lines.push('APPROVED LEGAL INTAKE — ACTION REQUIRED');
+  lines.push('');
+  lines.push('Reviewed and approved by '+currentReviewer+' on '+new Date().toLocaleString());
+  lines.push('Submission ID: '+(currentItem.SubmissionID||currentItem.Title));
+  lines.push('Agreement Type: '+currentItem.FormType);
+  lines.push('Entity: '+(currentItem.MerlinEntity||''));
+  if(notes){lines.push('');lines.push('REVIEWER NOTES: '+notes);}
+  lines.push('');
+  lines.push('--- GENERAL INFORMATION ---');
+  gen.forEach(function(a){lines.push(a.question.replace(/[*_]/g,'')+': '+a.answer);});
+  lines.push('');
+  lines.push('--- '+currentItem.FormType.toUpperCase()+' ---');
+  frm.forEach(function(a){lines.push(a.question.replace(/[*_]/g,'')+': '+a.answer);});
+  setTimeout(function(){
+    var a=document.createElement('a');
+    a.href='mailto:legal@themerlingroup.com?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(lines.join('\r\n'));
+    a.style.display='none'; document.body.appendChild(a); a.click();
+    setTimeout(function(){document.body.removeChild(a);},1000);
+  },800);
+}
+</script>
+</body>
+</html>
